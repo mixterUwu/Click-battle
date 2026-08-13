@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Battle - Salas Privadas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 30px;
+            position: relative;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .screen {
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .auth-form, .room-form {
+            max-width: 350px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form input, .room-form input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .auth-form input:focus, .room-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .player-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .player-card.host {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .room-code {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .click-area {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            font-size: 3em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .click-area:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .timer {
+            font-size: 2em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .score-display {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .result-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .win {
+            color: #28a745;
+        }
+        .lose {
+            color: #dc3545;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Menú Principal -->
+        <div id="menuScreen" class="screen hidden">
+            <h1 class="game-title">Click Battle</h1>
+            <p class="game-subtitle">¡Demuestra quién es el más rápido!</p>
+            <div class="menu-buttons">
+                <button class="btn btn-primary" onclick="showRoomEntry()">Jugar</button>
+                <button class="btn btn-secondary" onclick="showStats()">Estadísticas</button>
+                <button class="btn btn-danger" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <!-- Login / Registro -->
+        <div id="authScreen" class="screen">
+            <h2 class="game-title" style="font-size:2em;">Iniciar Sesión</h2>
+            <div class="auth-form">
+                <input type="text" id="username" placeholder="Usuario" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button class="btn btn-primary" onclick="login()">Iniciar Sesión</button>
+                <button class="btn btn-secondary" onclick="register()">Registrarse</button>
+            </div>
+            <p id="authError" style="color:red; margin-top:10px;"></p>
+        </div>
+
+        <!-- Entrada a Sala -->
+        <div id="roomEntryScreen" class="screen hidden">
+            <h2 class="game-title" style="font-size:2em;">Jugar Multijugador</h2>
+            <div style="margin: 20px 0;">
+                <button class="btn btn-success" onclick="createRoom()">Crear Sala</button>
+            </div>
+            <p style="margin: 15px 0; color:#666;">o únete con un código:</p>
+            <div class="room-form">
+                <input type="text" id="roomCodeInput" placeholder="Código de sala" maxlength="6" style="text-transform:uppercase;">
+                <button class="btn btn-primary" onclick="joinRoomWithCode()">Unirse</button>
+            </div>
+            <p id="roomError" style="color:red; margin-top:10px;"></p>
+            <button class="btn btn-secondary" onclick="backToMenu()">Volver</button>
+        </div>
+
+        <!-- Sala de Espera -->
+        <div id="roomLobbyScreen" class="screen hidden">
+            <h2 class="game-title" style="font-size:2em;">Sala de Espera</h2>
+            <p>Código de sala: <span id="roomCodeDisplay" class="room-code"></span></p>
+            <p id="roomHostLabel" style="color:#666; margin-bottom:10px;"></p>
+            <div id="roomPlayerList" class="player-list"></div>
+            <button class="btn btn-primary" id="startGameBtn" onclick="startGameFromRoom()" style="display:none;">Iniciar Partida</button>
+            <p id="roomLobbyMessage" style="color:#666; margin-top:10px;"></p>
+            <button class="btn btn-danger" onclick="leaveRoom()" style="margin-top:15px;">Salir de la Sala</button>
+        </div>
+
+        <!-- Juego -->
+        <div id="gameScreen" class="screen hidden">
+            <h2 class="game-title" style="font-size:2em;">¡Haz Clic!</h2>
+            <div class="timer" id="timerDisplay">10</div>
+            <div class="score-display">Clics: <span id="clickCounter">0</span></div>
+            <div class="click-area" id="clickArea" onclick="registerClick()">
+                ¡CLIC!
+            </div>
+        </div>
+
+        <!-- Resultado -->
+        <div id="resultScreen" class="screen hidden">
+            <h2 class="game-title" id="resultTitle" style="font-size:2.5em;"></h2>
+            <div class="result-box">
+                <p>Tu puntuación: <strong id="yourScore"></strong></p>
+                <p>Ganador: <strong id="winnerName"></strong></p>
+            </div>
+            <h3>Resultados:</h3>
+            <div id="resultsList"></div>
+            <button class="btn btn-primary" onclick="backToRoomLobby()">Volver a la Sala</button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div id="statsScreen" class="screen hidden">
+            <h2 class="game-title" style="font-size:2em;">Mis Estadísticas</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotalClicks">0</div>
+                    <div class="stat-label">Clics Totales</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statGamesPlayed">0</div>
+                    <div class="stat-label">Partidas Jugadas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statWins">0</div>
+                    <div class="stat-label">Victorias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statLosses">0</div>
+                    <div class="stat-label">Derrotas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statBestScore">0</div>
+                    <div class="stat-label">Mejor Puntuación</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="backToMenu()">Volver al Menú</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ==================== CONSTANTES ====================
+        const CHANNEL_NAME = 'clickbattle-channel';
+        const ROOMS_KEY = 'clickbattle_rooms';
+        const GAME_STATE_KEY = 'clickbattle_gamestate';
+        const GAME_SCORES_KEY = 'clickbattle_gamescores';
+        const GAME_RESULT_KEY = 'clickbattle_gameresult';
+        const ACCOUNTS_KEY = 'clickbattle_accounts';
+        const CURRENT_USER_KEY = 'clickbattle_currentuser';
+        const PLAYER_TIMEOUT = 10000; // 10 segundos
+        const ROOM_CLEANUP_INTERVAL = 20000; // limpiar salas vacías cada 20s
+
+        let currentUser = null;
+        let channel = null;
+        let gameTimer = null;
+        let roomHeartbeatInterval = null;
+        let cleanupInterval = null;
+        let localClicks = 0;
+        let gameId = null;
+        let gameDuration = 10;
+        let currentRoomCode = null;
+        let isRoomHost = false;
+
+        // ==================== INICIALIZACIÓN ====================
+        window.onload = function() {
+            if ('BroadcastChannel' in window) {
+                channel = new BroadcastChannel(CHANNEL_NAME);
+                channel.onmessage = handleChannelMessage;
+            }
+
+            const savedUser = localStorage.getItem(CURRENT_USER_KEY);
+            if (savedUser) {
+                currentUser = savedUser;
+                showMenu();
+            } else {
+                showAuth();
+            }
+
+            window.addEventListener('storage', handleStorageEvent);
+            startCleanup();
+        };
+
+        // ==================== GESTIÓN DE CUENTAS ====================
+        function getAccounts() {
+            const accounts = localStorage.getItem(ACCOUNTS_KEY);
+            return accounts ? JSON.parse(accounts) : [];
+        }
+
+        function saveAccounts(accounts) {
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        }
+
+        function register() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('authError');
+
+            if (!username || !password) {
+                errorEl.textContent = 'Por favor completa todos los campos.';
+                return;
+            }
+
+            const accounts = getAccounts();
+            if (accounts.some(acc => acc.username === username)) {
+                errorEl.textContent = 'El usuario ya existe.';
+                return;
+            }
+
+            accounts.push({
+                username,
+                password,
+                stats: {
+                    totalClicks: 0,
+                    gamesPlayed: 0,
+                    wins: 0,
+                    losses: 0,
+                    bestScore: 0
+                }
+            });
+            saveAccounts(accounts);
+            errorEl.textContent = '';
+            login();
+        }
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('authError');
+
+            const accounts = getAccounts();
+            const account = accounts.find(acc => acc.username === username && acc.password === password);
+            if (!account) {
+                errorEl.textContent = 'Usuario o contraseña incorrectos.';
+                return;
+            }
+
+            currentUser = username;
+            localStorage.setItem(CURRENT_USER_KEY, username);
+            showMenu();
+        }
+
+        function logout() {
+            if (currentRoomCode) leaveRoom();
+            localStorage.removeItem(CURRENT_USER_KEY);
+            currentUser = null;
+            stopRoomHeartbeat();
+            showAuth();
+        }
+
+        function updateAccountStats(updates) {
+            const accounts = getAccounts();
+            const idx = accounts.findIndex(acc => acc.username === currentUser);
+            if (idx !== -1) {
+                const stats = accounts[idx].stats;
+                if (updates.totalClicks) stats.totalClicks += updates.totalClicks;
+                if (updates.gamesPlayed) stats.gamesPlayed += updates.gamesPlayed;
+                if (updates.wins) stats.wins += updates.wins;
+                if (updates.losses) stats.losses += updates.losses;
+                if (updates.bestScore && updates.bestScore > stats.bestScore) stats.bestScore = updates.bestScore;
+                accounts[idx].stats = stats;
+                saveAccounts(accounts);
+            }
+        }
+
+        function getAccountStats() {
+            const accounts = getAccounts();
+            const account = accounts.find(acc => acc.username === currentUser);
+            return account ? account.stats : null;
+        }
+
+        // ==================== NAVEGACIÓN DE PANTALLAS ====================
+        function showAuth() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('authScreen').classList.remove('hidden');
+        }
+
+        function showMenu() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('menuScreen').classList.remove('hidden');
+        }
+
+        function showRoomEntry() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('roomEntryScreen').classList.remove('hidden');
+            document.getElementById('roomError').textContent = '';
+            document.getElementById('roomCodeInput').value = '';
+        }
+
+        function showRoomLobby() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('roomLobbyScreen').classList.remove('hidden');
+            document.getElementById('roomCodeDisplay').textContent = currentRoomCode;
+            updateRoomLobbyUI();
+        }
+
+        function showStats() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('statsScreen').classList.remove('hidden');
+            const stats = getAccountStats();
+            if (stats) {
+                document.getElementById('statTotalClicks').textContent = stats.totalClicks;
+                document.getElementById('statGamesPlayed').textContent = stats.gamesPlayed;
+                document.getElementById('statWins').textContent = stats.wins;
+                document.getElementById('statLosses').textContent = stats.losses;
+                document.getElementById('statBestScore').textContent = stats.bestScore;
+            }
+        }
+
+        function backToMenu() {
+            showMenu();
+        }
+
+        function backToRoomLobby() {
+            showRoomLobby();
+        }
+
+        // ==================== GESTIÓN DE SALAS ====================
+        function getRooms() {
+            const rooms = localStorage.getItem(ROOMS_KEY);
+            return rooms ? JSON.parse(rooms) : {};
+        }
+
+        function saveRooms(rooms) {
+            localStorage.setItem(ROOMS_KEY, JSON.stringify(rooms));
+        }
+
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function createRoom() {
+            if (!currentUser) return;
+            // Generar código único
+            let code;
+            const rooms = getRooms();
+            do {
+                code = generateRoomCode();
+            } while (rooms[code]);
+            // Crear sala
+            rooms[code] = {
+                host: currentUser,
+                players: { [currentUser]: Date.now() },
+                status: 'waiting'
+            };
+            saveRooms(rooms);
+            currentRoomCode = code;
+            isRoomHost = true;
+            broadcast({ type: 'roomCreated', roomCode: code });
+            stopRoomHeartbeat();
+            startRoomHeartbeat();
+            showRoomLobby();
+        }
+
+        function joinRoomWithCode() {
+            if (!currentUser) return;
+            const codeInput = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            const errorEl = document.getElementById('roomError');
+            if (!codeInput) {
+                errorEl.textContent = 'Por favor ingresa un código.';
+                return;
+            }
+            const rooms = getRooms();
+            const room = rooms[codeInput];
+            if (!room) {
+                errorEl.textContent = 'La sala no existe.';
+                return;
+            }
+            if (room.status === 'playing') {
+                errorEl.textContent = 'La sala está en juego. Espera a que termine.';
+                return;
+            }
+            // Unirse
+            room.players[currentUser] = Date.now();
+            saveRooms(rooms);
+            currentRoomCode = codeInput;
+            isRoomHost = (room.host === currentUser);
+            broadcast({ type: 'roomJoined', roomCode: codeInput, username: currentUser });
+            stopRoomHeartbeat();
+            startRoomHeartbeat();
+            showRoomLobby();
+        }
+
+        function leaveRoom() {
+            if (!currentRoomCode || !currentUser) return;
+            const rooms = getRooms();
+            const room = rooms[currentRoomCode];
+            if (room) {
+                delete room.players[currentUser];
+                if (room.host === currentUser) {
+                    // Si el host sale, eliminar la sala
+                    delete rooms[currentRoomCode];
+                    broadcast({ type: 'roomClosed', roomCode: currentRoomCode });
+                } else {
+                    rooms[currentRoomCode] = room;
+                    saveRooms(rooms);
+                    broadcast({ type: 'roomLeft', roomCode: currentRoomCode, username: currentUser });
+                }
+                if (!room.host === currentUser) saveRooms(rooms);
+            }
+            currentRoomCode = null;
+            isRoomHost = false;
+            stopRoomHeartbeat();
+            showMenu();
+        }
+
+        function startRoomHeartbeat() {
+            stopRoomHeartbeat();
+            roomHeartbeatInterval = setInterval(() => {
+                if (!currentRoomCode || !currentUser) return;
+                const rooms = getRooms();
+                const room = rooms[currentRoomCode];
+                if (!room) {
+                    // La sala fue eliminada
+                    currentRoomCode = null;
+                    isRoomHost = false;
+                    stopRoomHeartbeat();
+                    showToast('La sala fue cerrada.');
+                    showMenu();
+                    return;
+                }
+                room.players[currentUser] = Date.now();
+                // Limpiar jugadores inactivos
+                const now = Date.now();
+                for (const player in room.players) {
+                    if (now - room.players[player] > PLAYER_TIMEOUT) {
+                        delete room.players[player];
+                    }
+                }
+                if (Object.keys(room.players).length === 0) {
+                    delete rooms[currentRoomCode];
+                    currentRoomCode = null;
+                    isRoomHost = false;
+                    stopRoomHeartbeat();
+                } else {
+                    rooms[currentRoomCode] = room;
+                }
+                saveRooms(rooms);
+                if (currentRoomCode) updateRoomLobbyUI();
+            }, 5000);
+        }
+
+        function stopRoomHeartbeat() {
+            if (roomHeartbeatInterval) {
+                clearInterval(roomHeartbeatInterval);
+                roomHeartbeatInterval = null;
+            }
+        }
+
+        function updateRoomLobbyUI() {
+            if (!currentRoomCode) return;
+            const rooms = getRooms();
+            const room = rooms[currentRoomCode];
+            if (!room) {
+                showToast('La sala fue cerrada.');
+                showMenu();
+                return;
+            }
+            const now = Date.now();
+            const activePlayers = Object.entries(room.players)
+                .filter(([username, timestamp]) => now - timestamp < PLAYER_TIMEOUT)
+                .map(([username]) => username);
+            const playerListEl = document.getElementById('roomPlayerList');
+            playerListEl.innerHTML = '';
+            activePlayers.forEach(username => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                if (username === room.host) card.classList.add('host');
+                card.innerHTML = `
+                    <div class="player-avatar">${username.charAt(0).toUpperCase()}</div>
+                    <div class="player-name">${username} ${username === currentUser ? '(Tú)' : ''} ${username === room.host ? '(Anfitrión)' : ''}</div>
+                `;
+                playerListEl.appendChild(card);
+            });
+            const startBtn = document.getElementById('startGameBtn');
+            const messageEl = document.getElementById('roomLobbyMessage');
+            if (isRoomHost) {
+                startBtn.style.display = 'inline-block';
+                const canStart = activePlayers.length >= 2;
+                startBtn.disabled = !canStart;
+                startBtn.style.opacity = canStart ? '1' : '0.5';
+                messageEl.textContent = canStart ? '¡Listo para jugar!' : 'Esperando al menos 2 jugadores...';
+            } else {
+                startBtn.style.display = 'none';
+                messageEl.textContent = 'Esperando a que el anfitrión inicie la partida...';
+            }
+            document.getElementById('roomHostLabel').textContent = `Anfitrión: ${room.host}`;
+        }
+
+        function startCleanup() {
+            cleanupInterval = setInterval(() => {
+                const rooms = getRooms();
+                const now = Date.now();
+                let changed = false;
+                for (const code in rooms) {
+                    const room = rooms[code];
+                    for (const player in room.players) {
+                        if (now - room.players[player] > PLAYER_TIMEOUT) {
+                            delete room.players[player];
+                            changed = true;
+                        }
+                    }
+                    if (Object.keys(room.players).length === 0) {
+                        delete rooms[code];
+                        changed = true;
+                    }
+                }
+                if (changed) saveRooms(rooms);
+            }, ROOM_CLEANUP_INTERVAL);
+        }
+
+        // ==================== COMUNICACIÓN ====================
+        function broadcast(message) {
+            if (channel) {
+                channel.postMessage(message);
+            }
+        }
+
+        function handleChannelMessage(message) {
+            const data = message.data;
+            if (data.type === 'roomCreated' || data.type === 'roomJoined' || data.type === 'roomLeft' || data.type === 'roomClosed') {
+                if (currentRoomCode && data.roomCode === currentRoomCode) {
+                    updateRoomLobbyUI();
+                }
+            } else if (data.type === 'startGame') {
+                if (currentRoomCode === data.roomCode) {
+                    startGameFromSignal(data.roomCode, data.gameId, data.duration);
+                }
+            } else if (data.type === 'scoreSubmitted') {
+                if (isRoomHost && currentRoomCode === data.roomCode && data.gameId === gameId) {
+                    checkScores();
+                }
+            } else if (data.type === 'gameResult') {
+                if (currentRoomCode === data.roomCode && data.gameId === gameId) {
+                    showResult(data.result);
+                }
+            }
+        }
+
+        function handleStorageEvent(e) {
+            if (e.key === ROOMS_KEY && currentRoomCode) {
+                updateRoomLobbyUI();
+            } else if (e.key === GAME_STATE_KEY) {
+                const state = JSON.parse(e.newValue || 'null');
+                if (state && state.status === 'playing' && state.roomCode === currentRoomCode && !gameTimer) {
+                    startGameFromSignal(state.roomCode, state.gameId, state.duration);
+                }
+            } else if (e.key === GAME_RESULT_KEY) {
+                const result = JSON.parse(e.newValue || 'null');
+                if (result && result.roomCode === currentRoomCode && result.gameId === gameId) {
+                    showResult(result);
+                }
+            }
+        }
+
+        // ==================== LÓGICA DEL JUEGO ====================
+        function startGameFromRoom() {
+            if (!isRoomHost || !currentRoomCode) return;
+            const rooms = getRooms();
+            const room = rooms[currentRoomCode];
+            if (!room) return;
+            const now = Date.now();
+            const activePlayers = Object.entries(room.players)
+                .filter(([username, timestamp]) => now - timestamp < PLAYER_TIMEOUT)
+                .map(([username]) => username);
+            if (activePlayers.length < 2) return;
+            const gameId = Date.now().toString();
+            const duration = 10;
+            room.status = 'playing';
+            saveRooms(rooms);
+            const gameState = {
+                roomCode: currentRoomCode,
+                gameId,
+                status: 'playing',
+                startTime: Date.now(),
+                duration,
+                players: activePlayers
+            };
+            localStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
+            localStorage.setItem(GAME_SCORES_KEY, JSON.stringify({ roomCode: currentRoomCode, gameId, scores: {} }));
+            localStorage.removeItem(GAME_RESULT_KEY);
+            broadcast({ type: 'startGame', roomCode: currentRoomCode, gameId, duration });
+            startGameFromSignal(currentRoomCode, gameId, duration);
+        }
+
+        function startGameFromSignal(roomCode, gameIdArg, durationArg) {
+            if (gameTimer) return;
+            gameId = gameIdArg;
+            gameDuration = durationArg;
+            localClicks = 0;
+            document.getElementById('clickCounter').textContent = '0';
+            document.getElementById('timerDisplay').textContent = durationArg;
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('clickArea').style.pointerEvents = 'auto';
+            const startTime = Date.now();
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = durationArg - elapsed;
+                document.getElementById('timerDisplay').textContent = Math.max(0, remaining);
+                if (remaining <= 0) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                    endGame();
+                }
+            }, 100);
+        }
+
+        function registerClick() {
+            if (!gameTimer) return;
+            localClicks++;
+            document.getElementById('clickCounter').textContent = localClicks;
+        }
+
+        function endGame() {
+            document.getElementById('clickArea').style.pointerEvents = 'none';
+            submitScore();
+        }
+
+        function submitScore() {
+            const scoresData = JSON.parse(localStorage.getItem(GAME_SCORES_KEY) || '{"scores":{}}');
+            if (!scoresData.scores) scoresData.scores = {};
+            scoresData.scores[currentUser] = localClicks;
+            localStorage.setItem(GAME_SCORES_KEY, JSON.stringify(scoresData));
+            broadcast({ type: 'scoreSubmitted', roomCode: currentRoomCode, gameId });
+            if (isRoomHost) {
+                setTimeout(checkScores, 2000);
+            }
+        }
+
+        function checkScores() {
+            if (!isRoomHost || !currentRoomCode || !gameId) return;
+            const scoresData = JSON.parse(localStorage.getItem(GAME_SCORES_KEY) || '{"scores":{}}');
+            const scores = scoresData.scores || {};
+            const gameState = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || 'null');
+            if (!gameState || gameState.gameId !== gameId) return;
+            const players = gameState.players;
+            const allSubmitted = players.every(p => scores[p] !== undefined);
+            if (!allSubmitted) return;
+            let winner = null;
+            let maxClicks = -1;
+            for (const player of players) {
+                if (scores[player] > maxClicks) {
+                    maxClicks = scores[player];
+                    winner = player;
+                }
+            }
+            const result = {
+                roomCode: currentRoomCode,
+                gameId,
+                winner,
+                scores,
+                players
+            };
+            localStorage.setItem(GAME_RESULT_KEY, JSON.stringify(result));
+            broadcast({ type: 'gameResult', roomCode: currentRoomCode, gameId, result });
+            // Restablecer estado de la sala a waiting
+            const rooms = getRooms();
+            if (rooms[currentRoomCode]) {
+                rooms[currentRoomCode].status = 'waiting';
+                saveRooms(rooms);
+            }
+            showResult(result);
+        }
+
+        function showResult(result) {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+            const isWinner = result.winner === currentUser;
+            const resultTitle = document.getElementById('resultTitle');
+            resultTitle.textContent = isWinner ? '¡GANASTE!' : 'PERDISTE';
+            resultTitle.className = 'game-title ' + (isWinner ? 'win' : 'lose');
+            document.getElementById('yourScore').textContent = result.scores[currentUser] || 0;
+            document.getElementById('winnerName').textContent = result.winner;
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            result.players.forEach(player => {
+                const row = document.createElement('div');
+                row.style.padding = '5px';
+                row.style.background = player === result.winner ? '#d4edda' : 'transparent';
+                row.style.borderRadius = '5px';
+                row.innerHTML = `<strong>${player}</strong>: ${result.scores[player] || 0} clics`;
+                resultsList.appendChild(row);
+            });
+            const statsUpdates = {
+                totalClicks: result.scores[currentUser] || 0,
+                gamesPlayed: 1,
+                wins: isWinner ? 1 : 0,
+                losses: isWinner ? 0 : 1,
+                bestScore: result.scores[currentUser] || 0
+            };
+            updateAccountStats(statsUpdates);
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('resultScreen').classList.remove('hidden');
+            isRoomHost = false;
+            gameId = null;
+            localClicks = 0;
+            // El usuario puede volver a la sala
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ==================== LIMPIEZA ====================
+        window.addEventListener('beforeunload', () => {
+            if (currentRoomCode) {
+                leaveRoom();
+            }
+            if (channel) channel.close();
+            if (cleanupInterval) clearInterval(cleanupInterval);
+        });
+    </script>
+</body>
+</html>
