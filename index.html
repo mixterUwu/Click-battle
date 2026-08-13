@@ -603,7 +603,8 @@
             const rooms = getRooms();
             const room = rooms[codeInput];
             if (!room) {
-                errorEl.textContent = 'La sala no existe.';
+                // NOTA AÑADIDA: Recordatorio de la limitación de LocalStorage
+                errorEl.textContent = 'La sala no existe (Recuerda usar el mismo navegador).';
                 return;
             }
             if (room.status === 'playing') {
@@ -625,19 +626,21 @@
             if (!currentRoomCode || !currentUser) return;
             const rooms = getRooms();
             const room = rooms[currentRoomCode];
+            
             if (room) {
                 delete room.players[currentUser];
                 if (room.host === currentUser) {
-                    // Si el host sale, eliminar la sala
+                    // Si el host sale, eliminar la sala y guardar el cambio
                     delete rooms[currentRoomCode];
+                    saveRooms(rooms); 
                     broadcast({ type: 'roomClosed', roomCode: currentRoomCode });
                 } else {
                     rooms[currentRoomCode] = room;
                     saveRooms(rooms);
                     broadcast({ type: 'roomLeft', roomCode: currentRoomCode, username: currentUser });
                 }
-                if (!room.host === currentUser) saveRooms(rooms);
             }
+            
             currentRoomCode = null;
             isRoomHost = false;
             stopRoomHeartbeat();
@@ -650,6 +653,7 @@
                 if (!currentRoomCode || !currentUser) return;
                 const rooms = getRooms();
                 const room = rooms[currentRoomCode];
+                
                 if (!room) {
                     // La sala fue eliminada
                     currentRoomCode = null;
@@ -660,13 +664,17 @@
                     return;
                 }
                 room.players[currentUser] = Date.now();
-                // Limpiar jugadores inactivos
-                const now = Date.now();
-                for (const player in room.players) {
-                    if (now - room.players[player] > PLAYER_TIMEOUT) {
-                        delete room.players[player];
+                
+                // Limpiar jugadores inactivos SOLO SI ERES EL HOST (Evita conflictos)
+                if (isRoomHost) {
+                    const now = Date.now();
+                    for (const player in room.players) {
+                        if (now - room.players[player] > PLAYER_TIMEOUT) {
+                            delete room.players[player];
+                        }
                     }
                 }
+                
                 if (Object.keys(room.players).length === 0) {
                     delete rooms[currentRoomCode];
                     currentRoomCode = null;
@@ -675,9 +683,10 @@
                 } else {
                     rooms[currentRoomCode] = room;
                 }
+                
                 saveRooms(rooms);
                 if (currentRoomCode) updateRoomLobbyUI();
-            }, 5000);
+            }, 3000); // 3 Segundos para que se refresque más rápido
         }
 
         function stopRoomHeartbeat() {
@@ -934,10 +943,10 @@
             updateAccountStats(statsUpdates);
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('resultScreen').classList.remove('hidden');
-            isRoomHost = false;
+            
+            // LA VARIABLE isRoomHost YA NO SE CAMBIA A FALSO, ASÍ EL HOST MANTIENE SUS PERMISOS
             gameId = null;
             localClicks = 0;
-            // El usuario puede volver a la sala
         }
 
         // ==================== TOAST ====================
