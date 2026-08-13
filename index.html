@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Click Battle - Salas Privadas Multijugador</title>
+    <title>Click Battle - Salas Privadas Multijugador + Modo Bot</title>
     <!-- Librería MQTT para conexión en tiempo real multi-dispositivo -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
@@ -271,7 +271,8 @@
             <h1 class="game-title">Click Battle</h1>
             <p class="game-subtitle">¡Demuestra quién es el más rápido online!</p>
             <div class="menu-buttons">
-                <button class="btn btn-primary" onclick="showRoomEntry()">Jugar</button>
+                <button class="btn btn-primary" onclick="showRoomEntry()">Jugar Multijugador</button>
+                <button class="btn btn-secondary" onclick="showBotEntry()">Jugar vs Bot</button>
                 <button class="btn btn-secondary" onclick="showStats()">Estadísticas</button>
                 <button class="btn btn-danger" onclick="logout()">Cerrar Sesión</button>
             </div>
@@ -289,7 +290,7 @@
             <p id="authError" style="color:red; margin-top:10px;"></p>
         </div>
 
-        <!-- Entrada a Sala -->
+        <!-- Entrada a Sala Multijugador -->
         <div id="roomEntryScreen" class="screen hidden">
             <h2 class="game-title" style="font-size:2em;">Jugar Multijugador</h2>
             <div style="margin: 20px 0;">
@@ -304,7 +305,7 @@
             <button class="btn btn-secondary" onclick="backToMenu()" style="margin-top:15px;">Volver</button>
         </div>
 
-        <!-- Sala de Espera -->
+        <!-- Sala de Espera Multijugador -->
         <div id="roomLobbyScreen" class="screen hidden">
             <h2 class="game-title" style="font-size:2em;">Sala de Espera</h2>
             <p>Código de sala: <span id="roomCodeDisplay" class="room-code"></span></p>
@@ -313,6 +314,18 @@
             <button class="btn btn-primary" id="startGameBtn" onclick="startGameFromRoom()" style="display:none;">Iniciar Partida</button>
             <p id="roomLobbyMessage" style="color:#666; margin-top:10px;"></p>
             <button class="btn btn-danger" onclick="leaveRoom()" style="margin-top:15px;">Salir de la Sala</button>
+        </div>
+
+        <!-- Selección de dificultad para el Bot -->
+        <div id="botEntryScreen" class="screen hidden">
+            <h2 class="game-title" style="font-size:2em;">Jugar vs Bot</h2>
+            <p class="game-subtitle">Elige la dificultad del bot:</p>
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto;">
+                <button class="btn btn-primary" onclick="startBotGame('facil')">Fácil</button>
+                <button class="btn btn-primary" onclick="startBotGame('normal')">Normal</button>
+                <button class="btn btn-primary" onclick="startBotGame('dificil')">Difícil</button>
+            </div>
+            <button class="btn btn-secondary" onclick="backToMenu()" style="margin-top:20px;">Volver</button>
         </div>
 
         <!-- Juego -->
@@ -334,7 +347,8 @@
             </div>
             <h3>Resultados de la partida:</h3>
             <div id="resultsList" style="margin-top:15px;"></div>
-            <button class="btn btn-primary" onclick="backToRoomLobby()" style="margin-top:20px;">Volver a la Sala</button>
+            <button class="btn btn-primary" id="backToRoomBtn" onclick="backToRoomLobby()" style="margin-top:20px;">Volver a la Sala</button>
+            <button class="btn btn-secondary" id="backToMenuFromResultBtn" onclick="backToMenu()" style="margin-top:20px; display:none;">Volver al Menú</button>
         </div>
 
         <!-- Estadísticas -->
@@ -390,6 +404,10 @@
         let localClicks = 0;
         let gameDuration = 10;
         let scoresReceived = {};
+
+        // Variables para modo bot
+        let isBotMode = false;
+        let botDifficulty = 'normal';
 
         // ==================== INICIALIZACIÓN ====================
         window.onload = function() {
@@ -734,6 +752,35 @@
             startGameFromSignal(gameId, 10);
         }
 
+        function startBotGame(difficulty) {
+            // Desactivar cualquier conexión de sala activa
+            leaveRoom(true);
+            isBotMode = true;
+            botDifficulty = difficulty;
+
+            gameId = Date.now().toString();
+            localClicks = 0;
+            document.getElementById('clickCounter').textContent = '0';
+            document.getElementById('timerDisplay').textContent = '10';
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('clickArea').style.pointerEvents = 'auto';
+
+            const startTime = Date.now();
+            const duration = 10;
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = duration - elapsed;
+                document.getElementById('timerDisplay').textContent = Math.max(0, remaining);
+                if (remaining <= 0) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                    endBotGame();
+                }
+            }, 100);
+        }
+
         function startGameFromSignal(gameIdArg, durationArg) {
             if (gameTimer) clearInterval(gameTimer);
             gameId = gameIdArg;
@@ -770,6 +817,11 @@
         function endGame() {
             document.getElementById('clickArea').style.pointerEvents = 'none';
 
+            if (isBotMode) {
+                endBotGame();
+                return;
+            }
+
             sendNetworkMessage({
                 type: 'submitScore',
                 gameId: gameId,
@@ -781,6 +833,34 @@
                 scoresReceived[currentUser] = localClicks;
                 setTimeout(checkAllScores, 1500);
             }
+        }
+
+        function endBotGame() {
+            // Calcular puntuación del bot
+            const botScore = generateBotScore(botDifficulty);
+            const isWinner = localClicks > botScore;
+
+            const result = {
+                gameId: gameId,
+                winner: isWinner ? currentUser : 'Bot',
+                scores: { [currentUser]: localClicks, 'Bot': botScore },
+                players: [currentUser, 'Bot'],
+                isBotMode: true
+            };
+
+            showResult(result);
+        }
+
+        function generateBotScore(difficulty) {
+            const baseClicksPerSecond = {
+                'facil': 5,
+                'normal': 10,
+                'dificil': 15
+            };
+            const perSec = baseClicksPerSecond[difficulty] || 10;
+            const variance = perSec * 0.25; // +/-25%
+            const score = Math.round((perSec + (Math.random() * variance * 2 - variance)) * gameDuration);
+            return Math.max(0, score);
         }
 
         function checkAllScores() {
@@ -854,11 +934,27 @@
                 bestScore: result.scores[currentUser] || 0
             });
 
+            // Mostrar botones según modo
+            const backToRoomBtn = document.getElementById('backToRoomBtn');
+            const backToMenuBtn = document.getElementById('backToMenuFromResultBtn');
+            if (result.isBotMode) {
+                backToRoomBtn.style.display = 'none';
+                backToMenuBtn.style.display = 'inline-block';
+            } else {
+                backToRoomBtn.style.display = 'inline-block';
+                backToMenuBtn.style.display = 'none';
+            }
+
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('resultScreen').classList.remove('hidden');
 
+            // Limpiar estado
             gameId = null;
             localClicks = 0;
+            if (isBotMode) {
+                isBotMode = false;
+                botDifficulty = 'normal';
+            }
         }
 
         // ==================== CUENTAS Y ESTADÍSTICAS ====================
@@ -949,6 +1045,9 @@
         }
 
         function showMenu() {
+            // Asegurarse de salir de cualquier sala o bot activo
+            if (currentRoomCode) leaveRoom(true);
+            isBotMode = false;
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('menuScreen').classList.remove('hidden');
         }
@@ -958,6 +1057,11 @@
             document.getElementById('roomEntryScreen').classList.remove('hidden');
             document.getElementById('roomError').textContent = '';
             document.getElementById('roomCodeInput').value = '';
+        }
+
+        function showBotEntry() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('botEntryScreen').classList.remove('hidden');
         }
 
         function showRoomLobby() {
@@ -980,7 +1084,9 @@
         }
 
         function backToMenu() {
-            leaveRoom();
+            // Cerrar conexiones y resetear estado
+            if (currentRoomCode) leaveRoom(true);
+            isBotMode = false;
             showMenu();
         }
 
