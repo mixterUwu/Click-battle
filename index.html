@@ -958,7 +958,7 @@
             gameId = null;
         }
 
-        function showToast() {
+        function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
@@ -966,8 +966,8 @@
         }
 
         window.addEventListener('beforeunload', () => {
-            if () leaverue);
-        })
+            if (currentRoomCode) leaveRoom(true);
+        });
     </script>
 </body>
 </html>
