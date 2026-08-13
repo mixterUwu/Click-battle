@@ -3,16 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Click Battle - Salas Privadas Multijugador + Modo Bot</title>
-    <!-- Librería MQTT para conexión en tiempo real multi-dispositivo -->
+    <title>Click Battle - Completo</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,7 +16,6 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
             background: white;
             border-radius: 20px;
@@ -32,29 +25,15 @@
             padding: 30px;
             position: relative;
         }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .screen {
-            text-align: center;
-        }
-
+        .hidden { display: none !important; }
+        .screen { text-align: center; }
         .game-title {
-            font-size: 3em;
+            font-size: 2.5em;
             color: #667eea;
             margin-bottom: 10px;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
-        .game-subtitle {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
+        .game-subtitle { font-size: 1.1em; color: #666; margin-bottom: 30px; }
         .btn {
             padding: 15px 30px;
             font-size: 1.1em;
@@ -63,48 +42,13 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
-            letter-spacing: 1px;
             margin: 5px;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
         .auth-form, .room-form {
             max-width: 350px;
             margin: 0 auto;
@@ -112,40 +56,25 @@
             flex-direction: column;
             gap: 15px;
         }
-
         .auth-form input, .room-form input {
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1em;
-            transition: border-color 0.3s;
         }
-
-        .auth-form input:focus, .room-form input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
         .player-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             margin: 20px 0;
         }
-
         .player-card {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 15px;
-            transition: all 0.3s;
             border: 2px solid transparent;
         }
-
-        .player-card.host {
-            border-color: #ffc107;
-            background: #fff3cd;
-        }
-
+        .player-card.host { border-color: #ffc107; background: #fff3cd; }
         .player-avatar {
             width: 60px;
             height: 60px;
@@ -159,12 +88,7 @@
             color: white;
             font-weight: bold;
         }
-
-        .player-name {
-            font-weight: bold;
-            color: #333;
-        }
-
+        .player-name { font-weight: bold; color: #333; }
         .room-code {
             font-size: 2em;
             font-weight: bold;
@@ -172,13 +96,13 @@
             letter-spacing: 2px;
             margin: 10px 0;
         }
-
         .click-area {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 20px auto;
             background: linear-gradient(145deg, #667eea, #764ba2);
-            border-radius: 50%;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,64 +110,47 @@
             user-select: none;
             transition: transform 0.1s;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            font-size: 2.5em;
+            font-size: 3em;
             color: white;
             font-weight: bold;
+            touch-action: none;
         }
-
-        .click-area:active {
-            transform: scale(0.92);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .timer {
-            font-size: 2em;
-            color: #333;
-            margin: 20px 0;
-        }
-
+        .click-area:active { transform: scale(0.95); }
+        .timer { font-size: 2em; color: #333; margin: 20px 0; }
         .score-display {
             font-size: 1.5em;
             color: #667eea;
             font-weight: bold;
             margin-bottom: 15px;
         }
-
+        .opponent-score {
+            font-size: 1.2em;
+            color: #dc3545;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
         .result-box {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 25px;
             margin: 20px 0;
         }
-
         .win { color: #28a745; }
         .lose { color: #dc3545; }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 15px;
             margin-top: 20px;
         }
-
         .stat-item {
             background: white;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-        }
-
+        .stat-value { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; font-size: 0.9em; }
         .toast {
             position: fixed;
             top: 20px;
@@ -257,46 +164,81 @@
             transition: all 0.5s;
             z-index: 1000;
         }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(0);
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .coin-display {
+            font-size: 1.2em;
+            color: #ffc107;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .skin-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .skin-card.owned { border-color: #28a745; background: #d4edda; }
+        .skin-card.selected { border-color: #667eea; background: #e7e7ff; }
+        .skin-preview {
+            width: 100%;
+            height: 80px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        /* Indicador global de monedas */
+        #globalCoins {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffc107;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Indicador global de monedas -->
+        <div id="globalCoins">🪙 0 monedas</div>
+
         <!-- Menú Principal -->
         <div id="menuScreen" class="screen hidden">
             <h1 class="game-title">Click Battle</h1>
             <p class="game-subtitle">¡Demuestra quién es el más rápido online!</p>
-            <div class="menu-buttons">
-                <button class="btn btn-primary" onclick="showRoomEntry()">Jugar Multijugador</button>
-                <button class="btn btn-secondary" onclick="showBotEntry()">Jugar vs Bot</button>
-                <button class="btn btn-secondary" onclick="showStats()">Estadísticas</button>
-                <button class="btn btn-danger" onclick="logout()">Cerrar Sesión</button>
-            </div>
+            <div class="coin-display" id="menuCoins">🪙 0 monedas</div>
+            <button class="btn btn-primary" onclick="showRoomEntry()">Jugar Multijugador</button>
+            <button class="btn btn-secondary" onclick="showBotEntry()">Jugar vs Bot</button>
+            <button class="btn btn-warning" onclick="showShop()">Tienda</button>
+            <button class="btn btn-secondary" onclick="showStats()">Estadísticas</button>
+            <button class="btn btn-danger" onclick="logout()">Cerrar Sesión</button>
         </div>
 
         <!-- Login / Registro -->
         <div id="authScreen" class="screen">
-            <h2 class="game-title" style="font-size:2em;">Iniciar Sesión</h2>
+            <h2 class="game-title">Iniciar Sesión</h2>
             <div class="auth-form">
-                <input type="text" id="username" placeholder="Usuario" required>
-                <input type="password" id="password" placeholder="Contraseña" required>
+                <input type="text" id="username" placeholder="Usuario">
+                <input type="password" id="password" placeholder="Contraseña">
                 <button class="btn btn-primary" onclick="login()">Iniciar Sesión</button>
                 <button class="btn btn-secondary" onclick="register()">Registrarse</button>
             </div>
             <p id="authError" style="color:red; margin-top:10px;"></p>
         </div>
 
-        <!-- Entrada a Sala Multijugador -->
+        <!-- Entrada a Sala -->
         <div id="roomEntryScreen" class="screen hidden">
-            <h2 class="game-title" style="font-size:2em;">Jugar Multijugador</h2>
-            <div style="margin: 20px 0;">
-                <button class="btn btn-success" onclick="createRoom()">Crear Sala</button>
-            </div>
-            <p style="margin: 15px 0; color:#666;">o únete con un código desde cualquier dispositivo:</p>
+            <h2 class="game-title">Jugar Multijugador</h2>
+            <button class="btn btn-success" onclick="createRoom()">Crear Sala</button>
+            <p style="margin: 15px 0; color:#666;">o únete con un código:</p>
             <div class="room-form">
                 <input type="text" id="roomCodeInput" placeholder="Código de sala" maxlength="6" style="text-transform:uppercase;">
                 <button class="btn btn-primary" onclick="joinRoomWithCode()">Unirse</button>
@@ -305,55 +247,63 @@
             <button class="btn btn-secondary" onclick="backToMenu()" style="margin-top:15px;">Volver</button>
         </div>
 
-        <!-- Sala de Espera Multijugador -->
+        <!-- Sala de Espera -->
         <div id="roomLobbyScreen" class="screen hidden">
-            <h2 class="game-title" style="font-size:2em;">Sala de Espera</h2>
+            <h2 class="game-title">Sala de Espera</h2>
             <p>Código de sala: <span id="roomCodeDisplay" class="room-code"></span></p>
-            <p id="roomHostLabel" style="color:#666; margin-bottom:10px;"></p>
+            <p id="roomHostLabel" style="color:#666;"></p>
             <div id="roomPlayerList" class="player-list"></div>
             <button class="btn btn-primary" id="startGameBtn" onclick="startGameFromRoom()" style="display:none;">Iniciar Partida</button>
             <p id="roomLobbyMessage" style="color:#666; margin-top:10px;"></p>
             <button class="btn btn-danger" onclick="leaveRoom()" style="margin-top:15px;">Salir de la Sala</button>
         </div>
 
-        <!-- Selección de dificultad para el Bot -->
+        <!-- Selección de dificultad -->
         <div id="botEntryScreen" class="screen hidden">
-            <h2 class="game-title" style="font-size:2em;">Jugar vs Bot</h2>
-            <p class="game-subtitle">Elige la dificultad del bot:</p>
-            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto;">
-                <button class="btn btn-primary" onclick="startBotGame('facil')">Fácil</button>
-                <button class="btn btn-primary" onclick="startBotGame('normal')">Normal</button>
-                <button class="btn btn-primary" onclick="startBotGame('dificil')">Difícil</button>
-            </div>
-            <button class="btn btn-secondary" onclick="backToMenu()" style="margin-top:20px;">Volver</button>
+            <h2 class="game-title">Jugar vs Bot</h2>
+            <p class="game-subtitle">Elige la dificultad:</p>
+            <button class="btn btn-primary" onclick="startBotGame('facil')">Fácil</button>
+            <button class="btn btn-primary" onclick="startBotGame('normal')">Normal</button>
+            <button class="btn btn-primary" onclick="startBotGame('dificil')">Difícil</button>
+            <br>
+            <button class="btn btn-secondary" onclick="backToMenu()">Volver</button>
+        </div>
+
+        <!-- Tienda -->
+        <div id="shopScreen" class="screen hidden">
+            <h2 class="game-title">Tienda de Skins</h2>
+            <div class="coin-display" id="shopCoins">🪙 0 monedas</div>
+            <div class="skin-grid" id="skinGrid"></div>
+            <button class="btn btn-secondary" onclick="backToMenu()">Volver</button>
         </div>
 
         <!-- Juego -->
         <div id="gameScreen" class="screen hidden">
-            <h2 class="game-title" style="font-size:2em;">¡Haz Clic!</h2>
+            <h2 class="game-title">¡Haz Clic!</h2>
             <div class="timer" id="timerDisplay">10</div>
-            <div class="score-display">Clics: <span id="clickCounter">0</span></div>
-            <div class="click-area" id="clickArea" onclick="registerClick()">
-                ¡CLIC!
-            </div>
+            <div class="score-display">Tus clics: <span id="clickCounter">0</span></div>
+            <div class="opponent-score" id="opponentScoreDisplay">Oponente: 0 clics</div>
+            <div class="click-area" id="clickArea">¡CLIC!</div>
         </div>
 
         <!-- Resultado -->
         <div id="resultScreen" class="screen hidden">
-            <h2 class="game-title" id="resultTitle" style="font-size:2.5em;"></h2>
+            <h2 class="game-title" id="resultTitle"></h2>
             <div class="result-box">
                 <p>Tu puntuación: <strong id="yourScore">0</strong></p>
                 <p>Ganador: <strong id="winnerName">-</strong></p>
+                <p class="coin-display" id="coinsEarned"></p>
+                <p class="coin-display" id="totalCoins"></p>
             </div>
-            <h3>Resultados de la partida:</h3>
-            <div id="resultsList" style="margin-top:15px;"></div>
-            <button class="btn btn-primary" id="backToRoomBtn" onclick="backToRoomLobby()" style="margin-top:20px;">Volver a la Sala</button>
-            <button class="btn btn-secondary" id="backToMenuFromResultBtn" onclick="backToMenu()" style="margin-top:20px; display:none;">Volver al Menú</button>
+            <h3>Resultados:</h3>
+            <div id="resultsList"></div>
+            <button class="btn btn-primary" id="backToRoomBtn" onclick="backToRoomLobby()">Volver a la Sala</button>
+            <button class="btn btn-secondary" id="backToMenuFromResultBtn" onclick="backToMenu()" style="display:none;">Volver al Menú</button>
         </div>
 
         <!-- Estadísticas -->
         <div id="statsScreen" class="screen hidden">
-            <h2 class="game-title" style="font-size:2em;">Mis Estadísticas</h2>
+            <h2 class="game-title">Mis Estadísticas</h2>
             <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-value" id="statTotalClicks">0</div>
@@ -361,7 +311,7 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="statGamesPlayed">0</div>
-                    <div class="stat-label">Partidas Jugadas</div>
+                    <div class="stat-label">Partidas</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="statWins">0</div>
@@ -373,39 +323,52 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="statBestScore">0</div>
-                    <div class="stat-label">Mejor Puntuación</div>
+                    <div class="stat-label">Mejor Punt.</div>
                 </div>
             </div>
-            <button class="btn btn-secondary" onclick="backToMenu()" style="margin-top:20px;">Volver al Menú</button>
+            <button class="btn btn-secondary" onclick="backToMenu()">Volver</button>
         </div>
     </div>
 
     <div id="toast" class="toast"></div>
 
     <script>
-        // ==================== CONSTANTES Y ESTADO GLOBAL ====================
+        // ==================== CONSTANTES ====================
         const ACCOUNTS_KEY = 'clickbattle_accounts';
         const CURRENT_USER_KEY = 'clickbattle_currentuser';
         const MQTT_BROKER = 'wss://broker.emqx.io:8084/mqtt';
         const TOPIC_PREFIX = 'clickbattle/rooms/';
+
+        // Skins ampliadas
+        const SKINS = [
+            { id: 'default', name: 'Clásico', color1: '#667eea', color2: '#764ba2', price: 0 },
+            { id: 'fire', name: 'Fuego', color1: '#ff6b35', color2: '#ff4500', price: 50 },
+            { id: 'ocean', name: 'Océano', color1: '#00c6ff', color2: '#0072ff', price: 50 },
+            { id: 'neon', name: 'Neón', color1: '#ff00ff', color2: '#00ffff', price: 100 },
+            { id: 'gold', name: 'Dorado', color1: '#ffd700', color2: '#ff8c00', price: 150 },
+            { id: 'galaxy', name: 'Galaxia', color1: '#8e2de2', color2: '#4a00e0', price: 200 },
+            { id: 'forest', name: 'Bosque', color1: '#2ecc71', color2: '#27ae60', price: 100 },
+            { id: 'candy', name: 'Caramelo', color1: '#ff9ff3', color2: '#f368e0', price: 80 },
+            { id: 'blood', name: 'Sangre', color1: '#e74c3c', color2: '#c0392b', price: 120 },
+            { id: 'ice', name: 'Hielo', color1: '#a8e6cf', color2: '#dcedc1', price: 80 },
+            { id: 'night', name: 'Noche', color1: '#2c3e50', color2: '#34495e', price: 100 },
+            { id: 'sunset', name: 'Atardecer', color1: '#ff512f', color2: '#dd2476', price: 180 }
+        ];
 
         let currentUser = null;
         let mqttClient = null;
         let currentRoomCode = null;
         let isRoomHost = false;
         let roomHost = null;
-        let roomPlayers = {}; // { username: lastPingTimestamp }
+        let roomPlayers = {};
         let roomStatus = 'waiting';
-
         let heartbeatTimer = null;
-        let joinTimeoutTimer = null;
         let gameTimer = null;
         let gameId = null;
         let localClicks = 0;
         let gameDuration = 10;
         let scoresReceived = {};
-
-        // Variables para modo bot
+        let opponentClicks = 0;
         let isBotMode = false;
         let botDifficulty = 'normal';
 
@@ -418,155 +381,319 @@
             } else {
                 showAuth();
             }
+            setupClickArea();
         };
 
-        // ==================== CONEXIÓN MULTIJUGADOR (MQTT) ====================
-        function connectNetwork(onConnected) {
-            if (mqttClient && mqttClient.connected) {
-                if (onConnected) onConnected();
+        function setupClickArea() {
+            const clickArea = document.getElementById('clickArea');
+            clickArea.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!gameTimer) return;
+                localClicks += e.changedTouches.length;
+                document.getElementById('clickCounter').textContent = localClicks;
+                broadcastClickUpdate();
+            }, { passive: false });
+            clickArea.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                if (!gameTimer) return;
+                localClicks++;
+                document.getElementById('clickCounter').textContent = localClicks;
+                broadcastClickUpdate();
+            });
+        }
+
+        function broadcastClickUpdate() {
+            if (isBotMode) {
+                opponentClicks = Math.floor(localClicks * 0.7);
+                document.getElementById('opponentScoreDisplay').textContent = `Bot: ${opponentClicks} clics`;
                 return;
             }
+            if (currentRoomCode && gameId) {
+                sendNetworkMessage({ type: 'clickUpdate', gameId, username: currentUser, clicks: localClicks });
+            }
+        }
 
-            showToast('Conectando con el servidor en línea...');
-            const clientId = 'cb_' + Math.random().toString(16).substr(2, 8);
+        // ==================== CUENTAS ====================
+        function getAccounts() {
+            return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
+        }
+        function saveAccounts(accounts) {
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        }
+        function getCurrentAccount() {
+            const accounts = getAccounts();
+            return accounts.find(a => a.username === currentUser);
+        }
+        function updateAccount(data) {
+            const accounts = getAccounts();
+            const idx = accounts.findIndex(a => a.username === currentUser);
+            if (idx !== -1) {
+                accounts[idx] = { ...accounts[idx], ...data };
+                saveAccounts(accounts);
+            }
+        }
 
+        function register() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('authError');
+            if (!username || !password) {
+                errorEl.textContent = 'Completa todos los campos.';
+                return;
+            }
+            const accounts = getAccounts();
+            if (accounts.some(a => a.username === username)) {
+                errorEl.textContent = 'El usuario ya existe.';
+                return;
+            }
+            accounts.push({
+                username,
+                password,
+                coins: 0,
+                ownedSkins: ['default'],
+                selectedSkin: 'default',
+                stats: { totalClicks: 0, gamesPlayed: 0, wins: 0, losses: 0, bestScore: 0 }
+            });
+            saveAccounts(accounts);
+            currentUser = username;
+            localStorage.setItem(CURRENT_USER_KEY, username);
+            showMenu();
+        }
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('authError');
+            const accounts = getAccounts();
+            const account = accounts.find(a => a.username === username && a.password === password);
+            if (!account) {
+                errorEl.textContent = 'Usuario o contraseña incorrectos.';
+                return;
+            }
+            currentUser = username;
+            localStorage.setItem(CURRENT_USER_KEY, username);
+            showMenu();
+        }
+
+        function logout() {
+            if (currentRoomCode) leaveRoom(true);
+            localStorage.removeItem(CURRENT_USER_KEY);
+            currentUser = null;
+            showAuth();
+        }
+
+        // ==================== NAVEGACIÓN ====================
+        function showAuth() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('globalCoins').style.display = 'none';
+        }
+        function showMenu() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('menuScreen').classList.remove('hidden');
+            updateCoinDisplay();
+            updateGlobalCoins();
+        }
+        function showRoomEntry() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('roomEntryScreen').classList.remove('hidden');
+            document.getElementById('roomError').textContent = '';
+            document.getElementById('roomCodeInput').value = '';
+            updateGlobalCoins();
+        }
+        function showBotEntry() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('botEntryScreen').classList.remove('hidden');
+            updateGlobalCoins();
+        }
+        function showShop() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('shopScreen').classList.remove('hidden');
+            updateCoinDisplay();
+            renderShop();
+            updateGlobalCoins();
+        }
+        function showStats() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('statsScreen').classList.remove('hidden');
+            const account = getCurrentAccount();
+            if (account && account.stats) {
+                document.getElementById('statTotalClicks').textContent = account.stats.totalClicks || 0;
+                document.getElementById('statGamesPlayed').textContent = account.stats.gamesPlayed || 0;
+                document.getElementById('statWins').textContent = account.stats.wins || 0;
+                document.getElementById('statLosses').textContent = account.stats.losses || 0;
+                document.getElementById('statBestScore').textContent = account.stats.bestScore || 0;
+            }
+            updateGlobalCoins();
+        }
+        function showRoomLobby() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('roomLobbyScreen').classList.remove('hidden');
+            updateRoomLobbyUI();
+            updateGlobalCoins();
+        }
+        function backToMenu() {
+            if (currentRoomCode) leaveRoom(true);
+            isBotMode = false;
+            showMenu();
+        }
+        function backToRoomLobby() {
+            showRoomLobby();
+        }
+
+        function updateCoinDisplay() {
+            const account = getCurrentAccount();
+            const coins = account ? (account.coins || 0) : 0;
+            document.getElementById('menuCoins').textContent = `🪙 ${coins} monedas`;
+            document.getElementById('shopCoins').textContent = `🪙 ${coins} monedas`;
+        }
+
+        function updateGlobalCoins() {
+            const globalCoins = document.getElementById('globalCoins');
+            if (currentUser) {
+                const account = getCurrentAccount();
+                if (account) {
+                    const coins = account.coins || 0;
+                    globalCoins.textContent = `🪙 ${coins} monedas`;
+                    globalCoins.style.display = 'block';
+                } else {
+                    globalCoins.style.display = 'none';
+                }
+            } else {
+                globalCoins.style.display = 'none';
+            }
+        }
+
+        // ==================== TIENDA ====================
+        function renderShop() {
+            const account = getCurrentAccount();
+            if (!account) return;
+            const grid = document.getElementById('skinGrid');
+            grid.innerHTML = '';
+            SKINS.forEach(skin => {
+                const owned = account.ownedSkins.includes(skin.id);
+                const selected = account.selectedSkin === skin.id;
+                const card = document.createElement('div');
+                card.className = 'skin-card';
+                if (owned) card.classList.add('owned');
+                if (selected) card.classList.add('selected');
+                card.innerHTML = `
+                    <div class="skin-preview" style="background: linear-gradient(145deg, ${skin.color1}, ${skin.color2});"></div>
+                    <strong>${skin.name}</strong><br>
+                    ${owned ? (selected ? '✅ Equipada' : 'Comprada') : `🪙 ${skin.price}`}
+                `;
+                card.onclick = () => handleSkinClick(skin);
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSkinClick(skin) {
+            const account = getCurrentAccount();
+            if (!account) return;
+            if (account.ownedSkins.includes(skin.id)) {
+                updateAccount({ selectedSkin: skin.id });
+                showToast(`Skin ${skin.name} equipada`);
+            } else if ((account.coins || 0) >= skin.price) {
+                account.coins = (account.coins || 0) - skin.price;
+                account.ownedSkins.push(skin.id);
+                account.selectedSkin = skin.id;
+                updateAccount(account);
+                showToast(`¡Compraste ${skin.name}!`);
+            } else {
+                showToast('No tienes suficientes monedas');
+            }
+            renderShop();
+            updateCoinDisplay();
+            updateGlobalCoins();
+        }
+
+        function applySkin() {
+            const account = getCurrentAccount();
+            if (!account) return;
+            const skin = SKINS.find(s => s.id === account.selectedSkin) || SKINS[0];
+            const clickArea = document.getElementById('clickArea');
+            clickArea.style.background = `linear-gradient(145deg, ${skin.color1}, ${skin.color2})`;
+        }
+
+        // ==================== MQTT ====================
+        function connectNetwork(callback) {
+            if (mqttClient && mqttClient.connected) {
+                callback();
+                return;
+            }
             mqttClient = mqtt.connect(MQTT_BROKER, {
-                clientId: clientId,
+                clientId: 'cb_' + Math.random().toString(16).substr(2, 8),
                 clean: true,
-                connectTimeout: 6000,
-                reconnectPeriod: 3000
+                connectTimeout: 6000
             });
-
             mqttClient.on('connect', () => {
-                showToast('¡Conectado a la red!');
-                if (onConnected) onConnected();
+                showToast('Conectado');
+                callback();
             });
-
             mqttClient.on('message', (topic, message) => {
                 try {
-                    const data = JSON.parse(message.toString());
-                    handleNetworkMessage(data);
-                } catch (e) {
-                    console.error('Error parseando mensaje:', e);
-                }
+                    handleNetworkMessage(JSON.parse(message.toString()));
+                } catch (e) {}
             });
-
-            mqttClient.on('error', (err) => {
-                console.error('Error MQTT:', err);
-                showToast('Error de conexión a internet');
-            });
+            mqttClient.on('error', () => showToast('Error de conexión'));
         }
 
         function sendNetworkMessage(data) {
             if (mqttClient && mqttClient.connected && currentRoomCode) {
-                const topic = TOPIC_PREFIX + currentRoomCode;
-                mqttClient.publish(topic, JSON.stringify(data));
+                mqttClient.publish(TOPIC_PREFIX + currentRoomCode, JSON.stringify(data));
             }
         }
 
         function handleNetworkMessage(data) {
             if (!data || !data.type) return;
-
-            // 1. Solicitud para unirse (solo el Host la procesa)
-            if (data.type === 'joinRequest') {
-                if (isRoomHost) {
-                    if (roomStatus === 'playing') {
-                        sendNetworkMessage({ type: 'joinDenied', username: data.username, reason: 'La partida ya está en juego.' });
-                        return;
-                    }
-                    roomPlayers[data.username] = Date.now();
-                    broadcastRoomSync();
-                }
+            if (data.type === 'joinRequest' && isRoomHost) {
+                if (roomStatus === 'playing') return;
+                roomPlayers[data.username] = Date.now();
+                broadcastRoomSync();
             }
-
-            // 2. Respuesta de rechazo al unirse
-            if (data.type === 'joinDenied' && data.username === currentUser) {
-                if (joinTimeoutTimer) clearTimeout(joinTimeoutTimer);
-                document.getElementById('roomError').textContent = data.reason || 'No pudiste unirte.';
-                leaveRoom(true);
-            }
-
-            // 3. Sincronización del estado de la sala
             if (data.type === 'roomSync') {
-                if (joinTimeoutTimer) {
-                    clearTimeout(joinTimeoutTimer);
-                    joinTimeoutTimer = null;
-                }
-
                 roomHost = data.host;
                 roomPlayers = data.players || {};
                 roomStatus = data.status || 'waiting';
-
-                // Si fuimos aceptados en la sala
                 if (roomPlayers[currentUser]) {
-                    const roomLobbyVisible = !document.getElementById('roomLobbyScreen').classList.contains('hidden');
-                    const gameVisible = !document.getElementById('gameScreen').classList.contains('hidden');
-                    const resultVisible = !document.getElementById('resultScreen').classList.contains('hidden');
-
-                    if (!roomLobbyVisible && !gameVisible && !resultVisible) {
-                        showRoomLobby();
-                        startHeartbeat();
-                    } else {
-                        updateRoomLobbyUI();
-                    }
+                    showRoomLobby();
+                    startHeartbeat();
                 }
             }
-
-            // 4. Ping de presencia
-            if (data.type === 'ping') {
-                if (isRoomHost && data.username) {
-                    roomPlayers[data.username] = Date.now();
-                }
+            if (data.type === 'leave' && isRoomHost) {
+                delete roomPlayers[data.username];
+                broadcastRoomSync();
             }
-
-            // 5. Un jugador abandonó
-            if (data.type === 'leave') {
-                if (isRoomHost && data.username) {
-                    delete roomPlayers[data.username];
-                    broadcastRoomSync();
-                }
-            }
-
-            // 6. El Anfitrión cerró la sala
             if (data.type === 'roomClosed') {
-                showToast('El anfitrión cerró la sala.');
+                showToast('Sala cerrada');
                 leaveRoom(true);
             }
-
-            // 7. Inicio de partida
             if (data.type === 'startGame') {
-                if (data.gameId) {
-                    startGameFromSignal(data.gameId, data.duration || 10);
-                }
+                startGameFromSignal(data.gameId, data.duration);
             }
-
-            // 8. Envío de puntuación (Host recopila)
-            if (data.type === 'submitScore') {
-                if (isRoomHost && data.gameId === gameId) {
-                    scoresReceived[data.username] = data.score;
-                    checkAllScores();
-                }
+            if (data.type === 'clickUpdate' && data.gameId === gameId && data.username !== currentUser) {
+                opponentClicks = data.clicks;
+                document.getElementById('opponentScoreDisplay').textContent = `${data.username}: ${data.clicks} clics`;
             }
-
-            // 9. Resultados finales
+            if (data.type === 'submitScore' && isRoomHost && data.gameId === gameId) {
+                scoresReceived[data.username] = data.score;
+                checkAllScores();
+            }
             if (data.type === 'gameResult') {
                 showResult(data);
             }
         }
 
-        // ==================== GESTIÓN DE SALAS ====================
+        // ==================== SALAS ====================
         function generateRoomCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
             return code;
         }
 
         function createRoom() {
             if (!currentUser) return;
-
             connectNetwork(() => {
                 const code = generateRoomCode();
                 currentRoomCode = code;
@@ -574,49 +701,31 @@
                 roomHost = currentUser;
                 roomPlayers = { [currentUser]: Date.now() };
                 roomStatus = 'waiting';
-
-                mqttClient.subscribe(TOPIC_PREFIX + currentRoomCode, (err) => {
+                mqttClient.subscribe(TOPIC_PREFIX + code, (err) => {
                     if (!err) {
                         showRoomLobby();
                         startHeartbeat();
                         broadcastRoomSync();
-                    } else {
-                        showToast('Error al crear la sala en línea');
                     }
                 });
             });
         }
 
         function joinRoomWithCode() {
-            if (!currentUser) return;
             const codeInput = document.getElementById('roomCodeInput').value.trim().toUpperCase();
             const errorEl = document.getElementById('roomError');
-
             if (!codeInput || codeInput.length < 4) {
                 errorEl.textContent = 'Ingresa un código válido.';
                 return;
             }
-
-            errorEl.textContent = 'Buscando sala en línea...';
-
             connectNetwork(() => {
                 currentRoomCode = codeInput;
                 isRoomHost = false;
-
-                mqttClient.subscribe(TOPIC_PREFIX + currentRoomCode, (err) => {
-                    if (err) {
-                        errorEl.textContent = 'Error al conectar con la sala.';
-                        return;
-                    }
-
-                    // Solicitar unirse al anfitrión
+                mqttClient.subscribe(TOPIC_PREFIX + codeInput, () => {
                     sendNetworkMessage({ type: 'joinRequest', username: currentUser });
-
-                    // Tiempo de espera por si la sala no existe
-                    if (joinTimeoutTimer) clearTimeout(joinTimeoutTimer);
-                    joinTimeoutTimer = setTimeout(() => {
+                    setTimeout(() => {
                         if (!roomHost) {
-                            errorEl.textContent = 'No se encontró la sala o el anfitrión no está en línea.';
+                            errorEl.textContent = 'No se encontró la sala.';
                             leaveRoom(true);
                         }
                     }, 4000);
@@ -628,7 +737,6 @@
             if (!isRoomHost) return;
             sendNetworkMessage({
                 type: 'roomSync',
-                roomCode: currentRoomCode,
                 host: roomHost,
                 players: roomPlayers,
                 status: roomStatus
@@ -639,21 +747,14 @@
         function startHeartbeat() {
             stopHeartbeat();
             heartbeatTimer = setInterval(() => {
-                if (!currentRoomCode || !currentUser) return;
-
+                if (!currentRoomCode) return;
                 if (isRoomHost) {
-                    // Limpiar jugadores desconectados (> 8 seg sin señal)
                     const now = Date.now();
-                    let changed = false;
-                    for (const player in roomPlayers) {
-                        if (player !== currentUser && now - roomPlayers[player] > 8000) {
-                            delete roomPlayers[player];
-                            changed = true;
-                        }
+                    for (const p in roomPlayers) {
+                        if (p !== currentUser && now - roomPlayers[p] > 8000) delete roomPlayers[p];
                     }
                     broadcastRoomSync();
                 } else {
-                    // Jugador envía pulso de vida al anfitrión
                     sendNetworkMessage({ type: 'ping', username: currentUser });
                 }
             }, 2500);
@@ -668,138 +769,81 @@
 
         function leaveRoom(silent = false) {
             if (currentRoomCode) {
-                if (isRoomHost) {
-                    sendNetworkMessage({ type: 'roomClosed' });
-                } else {
-                    sendNetworkMessage({ type: 'leave', username: currentUser });
-                }
-
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.unsubscribe(TOPIC_PREFIX + currentRoomCode);
-                }
+                if (isRoomHost) sendNetworkMessage({ type: 'roomClosed' });
+                else sendNetworkMessage({ type: 'leave', username: currentUser });
+                if (mqttClient && mqttClient.connected) mqttClient.unsubscribe(TOPIC_PREFIX + currentRoomCode);
             }
-
             currentRoomCode = null;
             isRoomHost = false;
             roomPlayers = {};
             roomHost = null;
-            roomStatus = 'waiting';
             stopHeartbeat();
-            if (joinTimeoutTimer) clearTimeout(joinTimeoutTimer);
-
-            if (!silent) {
-                showMenu();
-            }
+            if (!silent) showMenu();
         }
 
         function updateRoomLobbyUI() {
             if (!currentRoomCode) return;
-
             document.getElementById('roomCodeDisplay').textContent = currentRoomCode;
-            document.getElementById('roomHostLabel').textContent = `Anfitrión: ${roomHost || 'Buscando...'}`;
-
-            const playerListEl = document.getElementById('roomPlayerList');
-            playerListEl.innerHTML = '';
-
-            const activePlayers = Object.keys(roomPlayers);
-
-            activePlayers.forEach(username => {
+            document.getElementById('roomHostLabel').textContent = `Anfitrión: ${roomHost || '...'}`;
+            const list = document.getElementById('roomPlayerList');
+            list.innerHTML = '';
+            Object.keys(roomPlayers).forEach(username => {
                 const card = document.createElement('div');
                 card.className = 'player-card';
                 if (username === roomHost) card.classList.add('host');
                 card.innerHTML = `
                     <div class="player-avatar">${username.charAt(0).toUpperCase()}</div>
-                    <div class="player-name">${username} ${username === currentUser ? '(Tú)' : ''} ${username === roomHost ? '(Anfitrión)' : ''}</div>
+                    <div class="player-name">${username} ${username === currentUser ? '(Tú)' : ''}</div>
                 `;
-                playerListEl.appendChild(card);
+                list.appendChild(card);
             });
-
             const startBtn = document.getElementById('startGameBtn');
-            const messageEl = document.getElementById('roomLobbyMessage');
-
+            const msg = document.getElementById('roomLobbyMessage');
             if (isRoomHost) {
                 startBtn.style.display = 'inline-block';
-                const canStart = activePlayers.length >= 2;
+                const canStart = Object.keys(roomPlayers).length >= 2;
                 startBtn.disabled = !canStart;
                 startBtn.style.opacity = canStart ? '1' : '0.5';
-                messageEl.textContent = canStart ? '¡Listo para iniciar!' : 'Esperando a que se una al menos otro jugador...';
+                msg.textContent = canStart ? '¡Listo!' : 'Esperando jugadores...';
             } else {
                 startBtn.style.display = 'none';
-                messageEl.textContent = 'Esperando a que el anfitrión inicie la partida...';
+                msg.textContent = 'Esperando al anfitrión...';
             }
         }
 
-        // ==================== LÓGICA DEL JUEGO ====================
+        // ==================== JUEGO ====================
         function startGameFromRoom() {
-            if (!isRoomHost || !currentRoomCode) return;
-            const activePlayers = Object.keys(roomPlayers);
-            if (activePlayers.length < 2) {
-                showToast('Se necesitan al menos 2 jugadores');
-                return;
-            }
-
+            if (!isRoomHost) return;
+            const players = Object.keys(roomPlayers);
+            if (players.length < 2) return;
             gameId = Date.now().toString();
             scoresReceived = {};
             roomStatus = 'playing';
             broadcastRoomSync();
-
-            sendNetworkMessage({
-                type: 'startGame',
-                gameId: gameId,
-                duration: 10
-            });
-
+            sendNetworkMessage({ type: 'startGame', gameId, duration: 10 });
             startGameFromSignal(gameId, 10);
         }
 
         function startBotGame(difficulty) {
-            // Desactivar cualquier conexión de sala activa
             leaveRoom(true);
             isBotMode = true;
             botDifficulty = difficulty;
-
             gameId = Date.now().toString();
             localClicks = 0;
+            opponentClicks = 0;
             document.getElementById('clickCounter').textContent = '0';
-            document.getElementById('timerDisplay').textContent = '10';
-
+            document.getElementById('opponentScoreDisplay').textContent = 'Bot: 0 clics';
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('clickArea').style.pointerEvents = 'auto';
-
+            applySkin();
             const startTime = Date.now();
-            const duration = 10;
             gameTimer = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const remaining = duration - elapsed;
+                const remaining = 10 - Math.floor((Date.now() - startTime) / 1000);
                 document.getElementById('timerDisplay').textContent = Math.max(0, remaining);
-                if (remaining <= 0) {
-                    clearInterval(gameTimer);
-                    gameTimer = null;
-                    endBotGame();
+                if (isBotMode) {
+                    opponentClicks = Math.floor(localClicks * 0.7);
+                    document.getElementById('opponentScoreDisplay').textContent = `Bot: ${opponentClicks} clics`;
                 }
-            }, 100);
-        }
-
-        function startGameFromSignal(gameIdArg, durationArg) {
-            if (gameTimer) clearInterval(gameTimer);
-            gameId = gameIdArg;
-            gameDuration = durationArg;
-            localClicks = 0;
-
-            document.getElementById('clickCounter').textContent = '0';
-            document.getElementById('timerDisplay').textContent = durationArg;
-
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('gameScreen').classList.remove('hidden');
-            document.getElementById('clickArea').style.pointerEvents = 'auto';
-
-            const startTime = Date.now();
-            gameTimer = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const remaining = durationArg - elapsed;
-                document.getElementById('timerDisplay').textContent = Math.max(0, remaining);
-
                 if (remaining <= 0) {
                     clearInterval(gameTimer);
                     gameTimer = null;
@@ -808,293 +852,113 @@
             }, 100);
         }
 
-        function registerClick() {
-            if (!gameTimer) return;
-            localClicks++;
-            document.getElementById('clickCounter').textContent = localClicks;
+        function startGameFromSignal(gameIdArg, durationArg) {
+            gameId = gameIdArg;
+            gameDuration = durationArg;
+            localClicks = 0;
+            opponentClicks = 0;
+            document.getElementById('clickCounter').textContent = '0';
+            document.getElementById('opponentScoreDisplay').textContent = 'Oponente: 0 clics';
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('gameScreen').classList.remove('hidden');
+            applySkin();
+            const startTime = Date.now();
+            gameTimer = setInterval(() => {
+                const remaining = durationArg - Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timerDisplay').textContent = Math.max(0, remaining);
+                if (remaining <= 0) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                    endGame();
+                }
+            }, 100);
         }
 
         function endGame() {
-            document.getElementById('clickArea').style.pointerEvents = 'none';
-
             if (isBotMode) {
-                endBotGame();
+                const botScore = Math.floor(localClicks * 0.7);
+                const isWinner = localClicks > botScore;
+                showResult({
+                    winner: isWinner ? currentUser : 'Bot',
+                    scores: { [currentUser]: localClicks, 'Bot': botScore },
+                    players: [currentUser, 'Bot'],
+                    isBotMode: true
+                });
                 return;
             }
-
-            sendNetworkMessage({
-                type: 'submitScore',
-                gameId: gameId,
-                username: currentUser,
-                score: localClicks
-            });
-
+            sendNetworkMessage({ type: 'submitScore', gameId, username: currentUser, score: localClicks });
             if (isRoomHost) {
                 scoresReceived[currentUser] = localClicks;
                 setTimeout(checkAllScores, 1500);
             }
         }
 
-        function endBotGame() {
-            // Calcular puntuación del bot
-            const botScore = generateBotScore(botDifficulty);
-            const isWinner = localClicks > botScore;
-
-            const result = {
-                gameId: gameId,
-                winner: isWinner ? currentUser : 'Bot',
-                scores: { [currentUser]: localClicks, 'Bot': botScore },
-                players: [currentUser, 'Bot'],
-                isBotMode: true
-            };
-
-            showResult(result);
-        }
-
-        function generateBotScore(difficulty) {
-            const baseClicksPerSecond = {
-                'facil': 5,
-                'normal': 10,
-                'dificil': 15
-            };
-            const perSec = baseClicksPerSecond[difficulty] || 10;
-            const variance = perSec * 0.25; // +/-25%
-            const score = Math.round((perSec + (Math.random() * variance * 2 - variance)) * gameDuration);
-            return Math.max(0, score);
-        }
-
         function checkAllScores() {
-            if (!isRoomHost || !gameId) return;
-
-            const activePlayers = Object.keys(roomPlayers);
-            const allSubmitted = activePlayers.every(p => scoresReceived[p] !== undefined);
-
-            if (!allSubmitted) return;
-
+            const players = Object.keys(roomPlayers);
+            if (!players.every(p => scoresReceived[p] !== undefined)) return;
             let winner = null;
-            let maxClicks = -1;
-
-            activePlayers.forEach(p => {
-                const score = scoresReceived[p] || 0;
-                if (score > maxClicks) {
-                    maxClicks = score;
+            let max = -1;
+            players.forEach(p => {
+                if (scoresReceived[p] > max) {
+                    max = scoresReceived[p];
                     winner = p;
                 }
             });
-
-            const resultData = {
-                type: 'gameResult',
-                gameId: gameId,
-                winner: winner,
-                scores: scoresReceived,
-                players: activePlayers
-            };
-
+            const result = { winner, scores: scoresReceived, players, isBotMode: false };
             roomStatus = 'waiting';
             broadcastRoomSync();
-
-            sendNetworkMessage(resultData);
-            showResult(resultData);
+            sendNetworkMessage({ type: 'gameResult', ...result });
+            showResult(result);
         }
 
         function showResult(result) {
-            if (gameTimer) {
-                clearInterval(gameTimer);
-                gameTimer = null;
-            }
-
+            if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
             const isWinner = result.winner === currentUser;
-            const resultTitle = document.getElementById('resultTitle');
-            resultTitle.textContent = isWinner ? '¡GANASTE!' : 'PERDISTE';
-            resultTitle.className = 'game-title ' + (isWinner ? 'win' : 'lose');
-
+            document.getElementById('resultTitle').textContent = isWinner ? '¡GANASTE!' : 'PERDISTE';
+            document.getElementById('resultTitle').className = 'game-title ' + (isWinner ? 'win' : 'lose');
             document.getElementById('yourScore').textContent = result.scores[currentUser] || 0;
             document.getElementById('winnerName').textContent = result.winner || 'Nadie';
 
-            const resultsList = document.getElementById('resultsList');
-            resultsList.innerHTML = '';
+            const coinsEarned = Math.floor((result.scores[currentUser] || 0) / 5);
+            document.getElementById('coinsEarned').textContent = `🪙 +${coinsEarned} monedas ganadas`;
 
-            result.players.forEach(player => {
+            const account = getCurrentAccount();
+            if (account) {
+                account.coins = (account.coins || 0) + coinsEarned;
+                account.stats.totalClicks += result.scores[currentUser] || 0;
+                account.stats.gamesPlayed++;
+                if (isWinner) account.stats.wins++;
+                else account.stats.losses++;
+                if ((result.scores[currentUser] || 0) > account.stats.bestScore) {
+                    account.stats.bestScore = result.scores[currentUser] || 0;
+                }
+                updateAccount(account);
+            }
+
+            const totalCoins = account ? (account.coins || 0) : 0;
+            document.getElementById('totalCoins').textContent = `Total: 🪙 ${totalCoins} monedas`;
+
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+            result.players.forEach(p => {
                 const row = document.createElement('div');
                 row.style.padding = '10px';
-                row.style.margin = '5px 0';
-                row.style.background = player === result.winner ? '#d4edda' : '#f8f9fa';
-                row.style.borderRadius = '8px';
-                row.style.border = player === result.winner ? '2px solid #28a745' : '1px solid #ddd';
-                row.innerHTML = `<strong>${player}</strong> ${player === currentUser ? '(Tú)' : ''}: <strong>${result.scores[player] || 0}</strong> clics`;
-                resultsList.appendChild(row);
+                row.style.background = p === result.winner ? '#d4edda' : '#f8f9fa';
+                row.innerHTML = `<strong>${p}</strong>: ${result.scores[p] || 0} clics`;
+                list.appendChild(row);
             });
 
-            // Actualizar estadísticas personales
-            updateAccountStats({
-                totalClicks: result.scores[currentUser] || 0,
-                gamesPlayed: 1,
-                wins: isWinner ? 1 : 0,
-                losses: isWinner ? 0 : 1,
-                bestScore: result.scores[currentUser] || 0
-            });
-
-            // Mostrar botones según modo
-            const backToRoomBtn = document.getElementById('backToRoomBtn');
-            const backToMenuBtn = document.getElementById('backToMenuFromResultBtn');
-            if (result.isBotMode) {
-                backToRoomBtn.style.display = 'none';
-                backToMenuBtn.style.display = 'inline-block';
-            } else {
-                backToRoomBtn.style.display = 'inline-block';
-                backToMenuBtn.style.display = 'none';
-            }
+            document.getElementById('backToRoomBtn').style.display = result.isBotMode ? 'none' : 'inline-block';
+            document.getElementById('backToMenuFromResultBtn').style.display = result.isBotMode ? 'inline-block' : 'none';
 
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('resultScreen').classList.remove('hidden');
-
-            // Limpiar estado
+            updateGlobalCoins();
+            isBotMode = false;
             gameId = null;
-            localClicks = 0;
-            if (isBotMode) {
-                isBotMode = false;
-                botDifficulty = 'normal';
-            }
         }
 
-        // ==================== CUENTAS Y ESTADÍSTICAS ====================
-        function getAccounts() {
-            const accounts = localStorage.getItem(ACCOUNTS_KEY);
-            return accounts ? JSON.parse(accounts) : [];
-        }
-
-        function saveAccounts(accounts) {
-            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-        }
-
-        function register() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorEl = document.getElementById('authError');
-
-            if (!username || !password) {
-                errorEl.textContent = 'Por favor completa todos los campos.';
-                return;
-            }
-
-            const accounts = getAccounts();
-            if (accounts.some(acc => acc.username === username)) {
-                errorEl.textContent = 'El usuario ya existe.';
-                return;
-            }
-
-            accounts.push({
-                username,
-                password,
-                stats: { totalClicks: 0, gamesPlayed: 0, wins: 0, losses: 0, bestScore: 0 }
-            });
-            saveAccounts(accounts);
-            errorEl.textContent = '';
-            login();
-        }
-
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorEl = document.getElementById('authError');
-
-            const accounts = getAccounts();
-            const account = accounts.find(acc => acc.username === username && acc.password === password);
-            if (!account) {
-                errorEl.textContent = 'Usuario o contraseña incorrectos.';
-                return;
-            }
-
-            currentUser = username;
-            localStorage.setItem(CURRENT_USER_KEY, username);
-            showMenu();
-        }
-
-        function logout() {
-            leaveRoom();
-            localStorage.removeItem(CURRENT_USER_KEY);
-            currentUser = null;
-            showAuth();
-        }
-
-        function updateAccountStats(updates) {
-            const accounts = getAccounts();
-            const idx = accounts.findIndex(acc => acc.username === currentUser);
-            if (idx !== -1) {
-                const stats = accounts[idx].stats;
-                if (updates.totalClicks) stats.totalClicks += updates.totalClicks;
-                if (updates.gamesPlayed) stats.gamesPlayed += updates.gamesPlayed;
-                if (updates.wins) stats.wins += updates.wins;
-                if (updates.losses) stats.losses += updates.losses;
-                if (updates.bestScore && updates.bestScore > stats.bestScore) stats.bestScore = updates.bestScore;
-                accounts[idx].stats = stats;
-                saveAccounts(accounts);
-            }
-        }
-
-        function getAccountStats() {
-            const accounts = getAccounts();
-            const account = accounts.find(acc => acc.username === currentUser);
-            return account ? account.stats : null;
-        }
-
-        // ==================== NAVEGACIÓN Y TOASTS ====================
-        function showAuth() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('authScreen').classList.remove('hidden');
-        }
-
-        function showMenu() {
-            // Asegurarse de salir de cualquier sala o bot activo
-            if (currentRoomCode) leaveRoom(true);
-            isBotMode = false;
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('menuScreen').classList.remove('hidden');
-        }
-
-        function showRoomEntry() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('roomEntryScreen').classList.remove('hidden');
-            document.getElementById('roomError').textContent = '';
-            document.getElementById('roomCodeInput').value = '';
-        }
-
-        function showBotEntry() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('botEntryScreen').classList.remove('hidden');
-        }
-
-        function showRoomLobby() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('roomLobbyScreen').classList.remove('hidden');
-            updateRoomLobbyUI();
-        }
-
-        function showStats() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('statsScreen').classList.remove('hidden');
-            const stats = getAccountStats();
-            if (stats) {
-                document.getElementById('statTotalClicks').textContent = stats.totalClicks;
-                document.getElementById('statGamesPlayed').textContent = stats.gamesPlayed;
-                document.getElementById('statWins').textContent = stats.wins;
-                document.getElementById('statLosses').textContent = stats.losses;
-                document.getElementById('statBestScore').textContent = stats.bestScore;
-            }
-        }
-
-        function backToMenu() {
-            // Cerrar conexiones y resetear estado
-            if (currentRoomCode) leaveRoom(true);
-            isBotMode = false;
-            showMenu();
-        }
-
-        function backToRoomLobby() {
-            showRoomLobby();
-        }
-
-        function showToast(message) {
+        function showToast() {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
@@ -1102,8 +966,8 @@
         }
 
         window.addEventListener('beforeunload', () => {
-            leaveRoom(true);
-        });
+            if () leaverue);
+        })
     </script>
 </body>
 </html>
